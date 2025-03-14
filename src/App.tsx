@@ -5,11 +5,9 @@ import { Player, Team, TeamInfo } from './types';
 import { generateTeams } from './utils/teamGenerator';
 import { Trash2, Zap } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, EffectCards } from 'swiper/modules';
+import { Pagination, A11y } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/effect-cards';
 
 // Define localStorage keys
 const STORAGE_KEYS = {
@@ -212,26 +210,36 @@ function App() {
               ))}
             </div>
 
-            {/* Mobile view - Card Slider */}
+            {/* Mobile view - Simple smooth swiper */}
             <div className="md:hidden">
-              <Swiper
-                modules={[Pagination, EffectCards]}
-                effect="cards"
-                grabCursor={true}
-                pagination={{ clickable: true }}
-                className="mt-4"
-              >
-                {generatedTeams.map((team, index) => (
-                  <SwiperSlide key={index} className="p-1">
-                    <TeamCard 
-                      team={team} 
-                      index={index} 
-                      teamInfos={[team1.teamInfo, team2.teamInfo].filter(Boolean) as TeamInfo[]}
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-              <p className="text-center text-gray-500 mt-5 text-sm">
+              <div className="swiper-container pb-12">
+                <Swiper
+                  modules={[Pagination, A11y]}
+                  spaceBetween={16}
+                  slidesPerView={1}
+                  pagination={{ clickable: true }}
+                  grabCursor={true}
+                  speed={300}
+                  threshold={5}
+                  touchRatio={1.5}
+                  resistanceRatio={0.85}
+                  watchSlidesProgress={true}
+                  className="mobile-swiper"
+                >
+                  {generatedTeams.map((team, index) => (
+                    <SwiperSlide key={index} className="py-2 px-1">
+                      <div className="shadow-md rounded-xl overflow-hidden">
+                        <TeamCard 
+                          team={team} 
+                          index={index} 
+                          teamInfos={[team1.teamInfo, team2.teamInfo].filter(Boolean) as TeamInfo[]}
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+              <p className="text-center text-gray-500 mt-2 text-sm">
                 Swipe to view more teams
               </p>
             </div>
