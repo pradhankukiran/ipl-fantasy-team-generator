@@ -3,7 +3,7 @@ import { TeamInput } from './components/TeamInput';
 import { TeamCard } from './components/TeamCard';
 import { Player, Team, TeamInfo } from './types';
 import { generateTeams } from './utils/teamGenerator';
-import { Trash2, Zap, Info } from 'lucide-react';
+import { Trash2, Zap } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, EffectCards } from 'swiper/modules';
 import 'swiper/css';
@@ -24,7 +24,6 @@ function App() {
   const [generatedTeams, setGeneratedTeams] = useState<Team[]>([]);
   const [error, setError] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [showInfo, setShowInfo] = useState<boolean>(false);
 
   // Load data from localStorage on initial render
   useEffect(() => {
@@ -129,40 +128,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            IPL Fantasy Team Generator
-          </h1>
-          <button 
-            onClick={() => setShowInfo(!showInfo)}
-            className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300"
-            aria-label="Information"
-          >
-            <Info size={20} className="text-blue-600" />
-          </button>
-        </div>
-        
-        {showInfo && (
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6 border-l-4 border-blue-500 animate-fade-in">
-            <h2 className="font-bold text-lg mb-2">How It Works</h2>
-            <p className="text-gray-700 mb-2">
-              Select two IPL teams and add their playing XIs. Once both teams are complete, 
-              our advanced algorithm will generate 20 unique fantasy teams combining players from both sides.
-            </p>
-            <p className="text-gray-700">
-              Each generated team will have balanced roles (WK, Batters, All-Rounders, Bowlers) 
-              and contain 4-7 players from each original team.
-            </p>
-            <button 
-              onClick={() => setShowInfo(false)}
-              className="mt-3 text-sm text-blue-600 font-medium hover:text-blue-800"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mt-4">
           <div className="transform transition-all duration-300 hover:-translate-y-1">
             <TeamInput
               teamName={team1.teamInfo?.name || "Team 1"}
@@ -271,10 +237,6 @@ function App() {
             </div>
           </div>
         )}
-        
-        <footer className="mt-12 sm:mt-16 text-center text-gray-500 text-sm py-4">
-          <p>© 2023 IPL Fantasy Team Generator</p>
-        </footer>
       </div>
     </div>
   );
