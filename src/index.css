@@ -2,12 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Swiper Customization */
 .swiper-pagination-bullet {
-  @apply bg-blue-500;
+  @apply bg-blue-500 opacity-70 transition-all duration-300;
 }
 
 .swiper-pagination-bullet-active {
-  @apply bg-blue-700;
+  @apply bg-blue-600 opacity-100 w-3 rounded-full;
 }
 
 .swiper-button-prev,
@@ -17,4 +18,69 @@
 
 .swiper-button-disabled {
   @apply opacity-50 cursor-not-allowed;
+}
+
+/* Card effect for mobile swiper */
+.swiper-effect-cards {
+  @apply overflow-visible;
+}
+
+.swiper-effect-cards .swiper-slide {
+  @apply rounded-xl shadow-lg transform transition-all duration-500;
+}
+
+.swiper-effect-cards .swiper-slide-active {
+  @apply shadow-xl;
+}
+
+.swiper-effect-cards .swiper-slide-prev,
+.swiper-effect-cards .swiper-slide-next {
+  @apply opacity-75 scale-95;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full transition-colors duration-300;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Input and form styles */
+input:focus, select:focus {
+  @apply ring-2 ring-blue-500 ring-opacity-50 outline-none;
+}
+
+/* Custom gradient background for body */
+body {
+  @apply bg-gray-50;
+  background-image: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1) 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
+  background-attachment: fixed;
 }

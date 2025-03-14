@@ -1,5 +1,6 @@
 import React from 'react';
 import { Team, TeamInfo, Player, TeamOrigin, PlayerRole } from '../types';
+import { Shield } from 'lucide-react';
 
 interface TeamCardProps {
   team: Team;
@@ -12,23 +13,13 @@ export function TeamCard({ team, index, teamInfos }: TeamCardProps) {
   const teamColor = teamInfos[index % teamInfos.length];
   
   const headerStyle = teamColor ? {
-    backgroundColor: teamColor.primaryColor,
+    background: `linear-gradient(135deg, ${teamColor.primaryColor}, ${teamColor.secondaryColor})`,
     color: teamColor.textColor,
-  } : {};
-  
-  // Ensure role tag has good contrast with background
-  const roleStyle = teamColor ? {
-    backgroundColor: teamColor.secondaryColor,
-    color: teamColor.textColor,
-    // Add a border if the text/background contrast might be low
-    border: isLightColor(teamColor.secondaryColor) && teamColor.textColor === '#FFFFFF' 
-      ? '1px solid #666666' 
-      : 'none'
   } : {
-    backgroundColor: '#e6f0ff',
-    color: '#0047b3'
+    background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+    color: '#FFFFFF'
   };
-
+  
   // Define the role order
   const roleOrder: PlayerRole[] = ['WK', 'Batter', 'All-Rounder', 'Bowler'];
   
@@ -36,6 +27,20 @@ export function TeamCard({ team, index, teamInfos }: TeamCardProps) {
   const sortedPlayers = [...team.players].sort((a, b) => {
     return roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
   });
+
+  // Count players by role
+  const playersByRole = sortedPlayers.reduce((acc, player) => {
+    acc[player.role] = (acc[player.role] || 0) + 1;
+    return acc;
+  }, {} as Record<PlayerRole, number>);
+
+  // Count players by team
+  const playersByTeam = sortedPlayers.reduce((acc, player) => {
+    if (player.originalTeam) {
+      acc[player.originalTeam] = (acc[player.originalTeam] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<TeamOrigin, number>);
 
   // Get team info based on player's original team
   const getPlayerTeamInfo = (player: Player): TeamInfo | undefined => {
@@ -77,7 +82,7 @@ export function TeamCard({ team, index, teamInfos }: TeamCardProps) {
     
     return (
       <div 
-        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 flex-shrink-0"
+        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
         style={{
           backgroundColor: teamInfo.primaryColor,
           color: teamInfo.textColor,
@@ -90,33 +95,99 @@ export function TeamCard({ team, index, teamInfos }: TeamCardProps) {
     );
   };
 
+  // Get role color based on the player's role
+  const getRoleColor = (role: PlayerRole) => {
+    const roleColors: Record<PlayerRole, { bg: string, text: string }> = {
+      'WK': { bg: '#fef3c7', text: '#92400e' },
+      'Batter': { bg: '#fee2e2', text: '#b91c1c' },
+      'All-Rounder': { bg: '#e0e7ff', text: '#4338ca' },
+      'Bowler': { bg: '#d1fae5', text: '#047857' }
+    };
+    
+    return roleColors[role];
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden h-full">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full transform transition-all duration-300">
       <div 
-        className="p-3 font-bold text-lg"
+        className="py-4 px-5 font-bold flex justify-between items-center"
         style={headerStyle}
       >
-        Team {index + 1}
+        <h3 className="text-lg font-bold">Team {index + 1}</h3>
+        
+        {/* Team composition badge */}
+        <div className="flex gap-1 items-center bg-black bg-opacity-20 py-1 px-2 rounded-full text-xs">
+          <div 
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: teamInfos[0]?.primaryColor || '#ccc' }}
+          ></div>
+          <span>{playersByTeam['team1'] || 0}</span>
+          <span>-</span>
+          <span>{playersByTeam['team2'] || 0}</span>
+          <div 
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: teamInfos[1]?.primaryColor || '#ccc' }}
+          ></div>
+        </div>
       </div>
-      <div className="p-4 space-y-2">
-        {sortedPlayers.map((player, playerIndex) => (
-          <div
-            key={playerIndex}
-            className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-            style={teamColor ? { borderLeft: `3px solid ${teamColor.primaryColor}` } : {}}
-          >
-            <div className="flex items-center flex-1 min-w-0">
-              {getPlayerTeamIcon(player)}
-              <span className="font-medium truncate">{player.name}</span>
-            </div>
-            <span 
-              className="text-sm px-2 py-1 rounded ml-2 flex-shrink-0" 
-              style={roleStyle}
-            >
-              {player.role}
-            </span>
+      
+      {/* Role counts */}
+      <div className="grid grid-cols-4 gap-1 p-2 bg-gray-50 border-b">
+        {roleOrder.map(role => (
+          <div key={role} className="text-center py-1">
+            <div className="text-xs text-gray-500">{role === 'All-Rounder' ? 'AR' : role}</div>
+            <div className="font-bold text-xs sm:text-sm">{playersByRole[role] || 0}</div>
           </div>
         ))}
+      </div>
+      
+      <div className="p-3 space-y-1.5">
+        {sortedPlayers.map((player, playerIndex) => {
+          const roleColor = getRoleColor(player.role);
+          
+          return (
+            <div
+              key={playerIndex}
+              className="flex items-center justify-between p-2 rounded-lg bg-gray-50 border border-gray-100 hover:shadow-sm transition-all"
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {getPlayerTeamIcon(player)}
+                <span className="font-medium text-sm truncate">{player.name}</span>
+              </div>
+              <span 
+                className="text-xs px-2 py-0.5 rounded-full ml-1 flex-shrink-0" 
+                style={{ 
+                  backgroundColor: roleColor.bg,
+                  color: roleColor.text
+                }}
+              >
+                {player.role === 'All-Rounder' ? 'AR' : player.role}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="px-4 py-3 border-t border-gray-100 flex justify-between items-center">
+        <div className="flex gap-2 items-center">
+          <Shield size={14} className="text-gray-400" />
+          <span className="text-xs text-gray-500">Fantasy XI</span>
+        </div>
+        
+        {teamInfos.length === 2 && (
+          <div className="flex">
+            <div 
+              className="w-4 h-4 rounded-full border-2 border-white"
+              style={{ backgroundColor: teamInfos[0]?.primaryColor }}
+              title={teamInfos[0]?.name}
+            ></div>
+            <div 
+              className="w-4 h-4 rounded-full border-2 border-white -ml-1"
+              style={{ backgroundColor: teamInfos[1]?.primaryColor }}
+              title={teamInfos[1]?.name}
+            ></div>
+          </div>
+        )}
       </div>
     </div>
   );

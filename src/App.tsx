@@ -3,12 +3,13 @@ import { TeamInput } from './components/TeamInput';
 import { TeamCard } from './components/TeamCard';
 import { Player, Team, TeamInfo } from './types';
 import { generateTeams } from './utils/teamGenerator';
-import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Trash2, Zap, Info } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Navigation, Pagination, EffectCards } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import 'swiper/css/effect-cards';
 
 // Define localStorage keys
 const STORAGE_KEYS = {
@@ -22,6 +23,8 @@ function App() {
   const [team2, setTeam2] = useState<Team>({ players: [] });
   const [generatedTeams, setGeneratedTeams] = useState<Team[]>([]);
   const [error, setError] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [showInfo, setShowInfo] = useState<boolean>(false);
 
   // Load data from localStorage on initial render
   useEffect(() => {
@@ -89,14 +92,21 @@ function App() {
     setError('');
   };
 
-  const handleGenerateTeams = () => {
+  const handleGenerateTeams = async () => {
     try {
+      setIsGenerating(true);
+      setError('');
+      
+      // Add a small delay to allow the loading state to render
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const teams = generateTeams(team1, team2);
       setGeneratedTeams(teams);
-      setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate teams');
       setGeneratedTeams([]);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -117,14 +127,43 @@ function App() {
   const isTeamsComplete = team1.players.length === 11 && team2.players.length === 11;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-4 sm:py-8 px-3 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
-          IPL Fantasy Team Generator
-        </h1>
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            IPL Fantasy Team Generator
+          </h1>
+          <button 
+            onClick={() => setShowInfo(!showInfo)}
+            className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300"
+            aria-label="Information"
+          >
+            <Info size={20} className="text-blue-600" />
+          </button>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-          <div>
+        {showInfo && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-6 border-l-4 border-blue-500 animate-fade-in">
+            <h2 className="font-bold text-lg mb-2">How It Works</h2>
+            <p className="text-gray-700 mb-2">
+              Select two IPL teams and add their playing XIs. Once both teams are complete, 
+              our advanced algorithm will generate 20 unique fantasy teams combining players from both sides.
+            </p>
+            <p className="text-gray-700">
+              Each generated team will have balanced roles (WK, Batters, All-Rounders, Bowlers) 
+              and contain 4-7 players from each original team.
+            </p>
+            <button 
+              onClick={() => setShowInfo(false)}
+              className="mt-3 text-sm text-blue-600 font-medium hover:text-blue-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          <div className="transform transition-all duration-300 hover:-translate-y-1">
             <TeamInput
               teamName={team1.teamInfo?.name || "Team 1"}
               players={team1.players}
@@ -136,7 +175,7 @@ function App() {
               onClearTeam={() => handleClearTeam('team1')}
             />
           </div>
-          <div>
+          <div className="transform transition-all duration-300 hover:-translate-y-1">
             <TeamInput
               teamName={team2.teamInfo?.name || "Team 2"}
               players={team2.players}
@@ -151,58 +190,73 @@ function App() {
         </div>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-center">
-            {error}
+          <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 text-center shadow-sm animate-fade-in">
+            <p className="font-medium">{error}</p>
           </div>
         )}
 
         {isTeamsComplete && generatedTeams.length === 0 && (
-          <div className="mt-6 sm:mt-8 text-center">
+          <div className="mt-8 sm:mt-10 text-center">
             <button
-              className="w-full sm:w-auto px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 font-medium"
+              className={`px-8 py-4 rounded-full shadow-lg font-medium text-white text-lg transition-all duration-300 flex items-center justify-center mx-auto gap-2
+              ${isGenerating 
+                ? 'bg-gray-500 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-xl hover:-translate-y-1'}`}
               onClick={handleGenerateTeams}
+              disabled={isGenerating}
             >
-              Generate 20 Teams
+              {isGenerating ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Zap size={20} />
+                  Generate 20 Teams
+                </>
+              )}
             </button>
           </div>
         )}
 
         {generatedTeams.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Generated Teams</h2>
+          <div className="mt-10 animate-fade-in">
+            <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800">Generated Teams</h2>
               <button
                 onClick={handleClearGeneratedTeams}
-                className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-red-300 text-red-600 rounded-full hover:bg-red-50 transition-colors duration-300 shadow-sm hover:shadow"
               >
                 <Trash2 size={16} />
-                <span>Clear Teams</span>
+                <span className="font-medium">Clear Teams</span>
               </button>
             </div>
 
-            {/* Desktop view */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Desktop view - Grid layout */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {generatedTeams.map((team, index) => (
-                <TeamCard 
-                  key={index} 
-                  team={team} 
-                  index={index} 
-                  teamInfos={[team1.teamInfo, team2.teamInfo].filter(Boolean) as TeamInfo[]}
-                />
+                <div key={index} className="transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                  <TeamCard 
+                    team={team} 
+                    index={index} 
+                    teamInfos={[team1.teamInfo, team2.teamInfo].filter(Boolean) as TeamInfo[]}
+                  />
+                </div>
               ))}
             </div>
 
-            {/* Mobile view with swiper */}
-            <div className="md:hidden relative">
+            {/* Mobile view - Card Slider */}
+            <div className="md:hidden">
               <Swiper
-                modules={[Pagination]}
-                spaceBetween={16}
-                slidesPerView={1}
+                modules={[Pagination, EffectCards]}
+                effect="cards"
+                grabCursor={true}
                 pagination={{ clickable: true }}
-                className="pb-10"
+                className="mt-4"
               >
                 {generatedTeams.map((team, index) => (
-                  <SwiperSlide key={index}>
+                  <SwiperSlide key={index} className="p-1">
                     <TeamCard 
                       team={team} 
                       index={index} 
@@ -211,9 +265,16 @@ function App() {
                   </SwiperSlide>
                 ))}
               </Swiper>
+              <p className="text-center text-gray-500 mt-5 text-sm">
+                Swipe to view more teams
+              </p>
             </div>
           </div>
         )}
+        
+        <footer className="mt-12 sm:mt-16 text-center text-gray-500 text-sm py-4">
+          <p>© 2023 IPL Fantasy Team Generator</p>
+        </footer>
       </div>
     </div>
   );
