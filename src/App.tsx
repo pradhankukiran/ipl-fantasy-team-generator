@@ -134,11 +134,6 @@ function App() {
     setGeneratedTeams([]);
   };
 
-  // Prevent touchmove propagation to avoid unwanted page scrolling
-  const preventScrollPropagation = (e: React.TouchEvent) => {
-    e.stopPropagation();
-  };
-
   const isTeamsComplete = team1.players.length === 11 && team2.players.length === 11;
 
   return (
@@ -229,12 +224,8 @@ function App() {
             </div>
 
             {/* Mobile view - Simple smooth swiper */}
-            <div 
-              className="md:hidden swiper-touch-wrapper"
-              onTouchStart={preventScrollPropagation}
-              onTouchMove={preventScrollPropagation}
-            >
-              <div className="swiper-container pb-12 touch-none">
+            <div className="md:hidden swiper-touch-wrapper">
+              <div className="swiper-container pb-12">
                 <Swiper
                   modules={[Pagination, A11y]}
                   spaceBetween={16}
@@ -246,10 +237,6 @@ function App() {
                   touchRatio={1.5}
                   resistanceRatio={0.85}
                   watchSlidesProgress={true}
-                  preventClicks={false}
-                  preventClicksPropagation={false}
-                  simulateTouch={true}
-                  touchStartPreventDefault={false}
                   className="mobile-swiper"
                 >
                   {generatedTeams.map((team, index) => (
