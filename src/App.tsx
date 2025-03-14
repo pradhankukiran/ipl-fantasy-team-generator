@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TeamInput } from './components/TeamInput';
 import { TeamCard } from './components/TeamCard';
 import { Player, Team, TeamInfo } from './types';
@@ -22,6 +22,7 @@ function App() {
   const [generatedTeams, setGeneratedTeams] = useState<Team[]>([]);
   const [error, setError] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const generatedTeamsRef = useRef<HTMLDivElement>(null);
 
   // Load data from localStorage on initial render
   useEffect(() => {
@@ -52,6 +53,18 @@ function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.GENERATED_TEAMS, JSON.stringify(generatedTeams));
   }, [generatedTeams]);
+
+  // Scroll to generated teams when they are created
+  useEffect(() => {
+    if (generatedTeams.length > 0 && generatedTeamsRef.current) {
+      setTimeout(() => {
+        generatedTeamsRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start'
+        });
+      }, 300);
+    }
+  }, [generatedTeams.length]);
 
   const handleAddPlayer = (team: 'team1' | 'team2', player: Player) => {
     if (team === 'team1') {
@@ -121,10 +134,15 @@ function App() {
     setGeneratedTeams([]);
   };
 
+  // Prevent touchmove propagation to avoid unwanted page scrolling
+  const preventScrollPropagation = (e: React.TouchEvent) => {
+    e.stopPropagation();
+  };
+
   const isTeamsComplete = team1.players.length === 11 && team2.players.length === 11;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-4 sm:py-8 px-3 sm:px-4 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mt-4">
           <div className="transform transition-all duration-300 hover:-translate-y-1">
@@ -185,7 +203,7 @@ function App() {
         )}
 
         {generatedTeams.length > 0 && (
-          <div className="mt-10 animate-fade-in">
+          <div ref={generatedTeamsRef} className="mt-10 animate-fade-in" id="generated-teams-section">
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
               <h2 className="text-2xl font-bold text-gray-800">Generated Teams</h2>
               <button
@@ -211,8 +229,12 @@ function App() {
             </div>
 
             {/* Mobile view - Simple smooth swiper */}
-            <div className="md:hidden">
-              <div className="swiper-container pb-12">
+            <div 
+              className="md:hidden swiper-touch-wrapper"
+              onTouchStart={preventScrollPropagation}
+              onTouchMove={preventScrollPropagation}
+            >
+              <div className="swiper-container pb-12 touch-none">
                 <Swiper
                   modules={[Pagination, A11y]}
                   spaceBetween={16}
@@ -224,6 +246,10 @@ function App() {
                   touchRatio={1.5}
                   resistanceRatio={0.85}
                   watchSlidesProgress={true}
+                  preventClicks={false}
+                  preventClicksPropagation={false}
+                  simulateTouch={true}
+                  touchStartPreventDefault={false}
                   className="mobile-swiper"
                 >
                   {generatedTeams.map((team, index) => (

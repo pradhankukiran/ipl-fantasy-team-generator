@@ -25,11 +25,24 @@
   @apply opacity-50 cursor-not-allowed;
 }
 
-/* Optimized mobile swiper */
+/* Optimized mobile swiper with scroll fixes */
+.swiper-touch-wrapper {
+  position: relative;
+  z-index: 10;
+  touch-action: pan-y;
+  isolation: isolate;
+}
+
+.touch-none {
+  touch-action: pan-y;
+}
+
 .mobile-swiper {
   overflow: visible;
   will-change: transform;
   padding-bottom: 30px;
+  height: auto !important;
+  pointer-events: auto !important;
 }
 
 .mobile-swiper .swiper-slide {
@@ -37,8 +50,9 @@
   transform-origin: center center;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  perspective: 1000px;
-  -webkit-perspective: 1000px;
+  pointer-events: auto !important;
+  height: auto !important;
+  touch-action: pan-y;
 }
 
 .mobile-swiper .swiper-slide-active {
@@ -50,6 +64,7 @@
   will-change: transform;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
+  height: auto !important;
 }
 
 .swiper-pagination {
@@ -57,6 +72,74 @@
   bottom: 0;
   left: 0;
   right: 0;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+/* Fix for random scrolling issues */
+html, body {
+  overscroll-behavior-y: none;
+}
+
+body {
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Hide scrollbars on mobile */
+@media (max-width: 768px) {
+  /* For Webkit browsers (Chrome, Safari) */
+  ::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  /* For Firefox */
+  * {
+    scrollbar-width: none !important;
+  }
+
+  /* For Internet Explorer/Edge */
+  * {
+    -ms-overflow-style: none !important;
+  }
+
+  /* Ensure body and html also have hidden scrollbars */
+  html, body {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  /* Handle any elements with overflow that might show scrollbars */
+  div {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  
+  div::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+
+/* Custom scrollbar for desktop */
+@media (min-width: 769px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full transition-colors duration-300;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
 }
 
 /* Custom animations */
@@ -73,24 +156,6 @@
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-gray-100 rounded-full;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full transition-colors duration-300;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
 }
 
 /* Input and form styles */
