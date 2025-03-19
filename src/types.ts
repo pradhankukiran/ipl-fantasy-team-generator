@@ -5,6 +5,8 @@ export interface Player {
   name: string;
   role: PlayerRole;
   originalTeam?: TeamOrigin;
+  isCaptain?: boolean;
+  isViceCaptain?: boolean;
 }
 
 export interface TeamInfo {

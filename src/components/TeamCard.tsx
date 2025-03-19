@@ -153,6 +153,16 @@ export function TeamCard({ team, index, teamInfos }: TeamCardProps) {
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 {getPlayerTeamIcon(player)}
                 <span className="font-medium text-sm truncate">{player.name}</span>
+                {player.isCaptain && (
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 ml-1">
+                    C
+                  </span>
+                )}
+                {player.isViceCaptain && (
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 ml-1">
+                    VC
+                  </span>
+                )}
               </div>
               <span 
                 className="text-xs px-2 py-0.5 rounded-full ml-1 flex-shrink-0" 

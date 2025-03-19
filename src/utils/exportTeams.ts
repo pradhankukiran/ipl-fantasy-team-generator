@@ -15,12 +15,13 @@ export function downloadAsJSON(teams: Team[]) {
 }
 
 export function downloadAsCSV(teams: Team[]) {
-  const headers = ['Team Number', 'Player Name', 'Role'];
+  const headers = ['Team Number', 'Player Name', 'Role', 'Captain'];
   const rows = teams.flatMap((team, teamIndex) =>
     team.players.map(player => [
       `Team ${teamIndex + 1}`,
       player.name,
-      player.role
+      player.role,
+      player.isCaptain ? 'Captain' : player.isViceCaptain ? 'Vice Captain' : ''
     ])
   );
   

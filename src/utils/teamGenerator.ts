@@ -238,6 +238,36 @@ function generateTeamsFromDistribution(
   return teams;
 }
 
+// Randomly select captain and vice-captain for a team
+function assignCaptaincy(team: Team): Team {
+  // Create a copy of the players array to avoid modifying the original
+  const players = [...team.players];
+  
+  // Randomly select captain
+  const captainIndex = Math.floor(Math.random() * players.length);
+  const captain = players[captainIndex];
+  
+  // Remove captain from consideration for vice-captain
+  players.splice(captainIndex, 1);
+  
+  // Randomly select vice-captain from remaining players
+  const viceIndex = Math.floor(Math.random() * players.length);
+  const viceCaptain = players[viceIndex];
+  
+  // Create updated players array with captaincy flags
+  const updatedPlayers = team.players.map(player => {
+    if (player === captain) {
+      return { ...player, isCaptain: true };
+    }
+    if (player === viceCaptain) {
+      return { ...player, isViceCaptain: true };
+    }
+    return player;
+  });
+  
+  return { ...team, players: updatedPlayers };
+}
+
 // Main team generation function that combines the systematic and fallback approaches
 export function generateTeams(team1: Team, team2: Team): Team[] {
   // Create player arrays with team origin info
@@ -352,5 +382,8 @@ export function generateTeams(team1: Team, team2: Team): Team[] {
   }
   
   // Shuffle the teams to mix systematic and random ones
-  return teams.sort(() => Math.random() - 0.5);
+  const shuffledTeams = teams.sort(() => Math.random() - 0.5);
+  
+  // Assign captains and vice-captains to each team
+  return shuffledTeams.map(team => assignCaptaincy(team));
 }
